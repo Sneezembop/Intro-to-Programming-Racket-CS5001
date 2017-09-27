@@ -1,0 +1,40 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Assignment7) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; Module 6 - Assignment 7
+
+;; #########################################
+;; FIBONACCI
+;; #########################################
+
+;; fibonacci : Number -> Number
+;; returns the fibonacci number of the input
+(check-expect (fibonacci 0) 0)
+(check-expect (fibonacci 1) 1)
+(check-expect (fibonacci 11) 89)
+(define (fibonacci n)
+  (cond [(= 0 n) 0]
+        [(= 1 n) 1]
+        [else (+ (fibonacci (- n 1)) (fibonacci (- n 2)))]))
+
+;; fibon-accu : Number -> Number
+;; returns the fibonacci number of the input
+;; uses an accumulator
+(check-expect (fibon-accu 0) 0)
+(check-expect (fibon-accu 1) 1)
+(check-expect (fibon-accu 11) 89)
+(define (fibon-accu n)
+  (local [;; Number Accumulator Accumulator -> Number
+          ;; calculates the fibonacci number
+          ;; accu: keeps the previous two fibonacci numbers
+          (define (fibonacci n accu1 accu2)
+            (cond [(= 0 n) accu2]
+                  [else (fibonacci (- n 1)
+                                   (+ accu1 accu2)
+                                   accu1)]))]
+    (fibonacci n 1 0)))
+
+;; #########################################
+;; TWITTER
+;; #########################################
+

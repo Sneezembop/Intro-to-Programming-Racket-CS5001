@@ -1,0 +1,40 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname Problemset) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+;; ##############################
+;; PROBLEM 1
+;; ##############################
+
+;; USD->EUR : Number -> Number
+;; Converts dollars to euros
+(check-expect (usd->eur 1) 0.89)
+
+(define (usd->eur dollars)
+  (* dollars 0.89))
+
+;; ##############################
+;; PROBLEM 2
+;; ##############################
+
+;; A CartesianPoint is (make-ca-point (Integer Integer))
+;; INTERP: represents a cartesian point with its x and y coordinates
+(define-struct ca-point (x-coord y-coord))
+
+#; (define (temp-ca acp)
+     (... (ca-point-x-coord acp)
+          ... (ca-point-y-coord acp)))
+
+(define point1 (make-ca-point 3 5))
+(define point2 (make-ca-point 1 2))
+(define point3 (make-ca-point 9 8))
+
+;; Ca-Distance: CartesianPoint CartesianPoint -> Number
+;; INTERP: finds the distance between two points in space
+(check-expect (ca-distance point1 point2) 2)
+(check-expect (ca-distance point1 point3) 6)
+(check-expect (ca-distance point3 point2) 8)
+
+(define (ca-distance point1 point2)
+  (sqrt (+ (sqr (- (ca-point-x-coord point2) (ca-point-x-coord point1)))
+           (sqr (- (ca-point-y-coord point2) (ca-point-y-coord point2))))))
+

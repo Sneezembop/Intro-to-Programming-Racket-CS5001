@@ -1,0 +1,95 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname SunsetPlanesExample) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+(require 2htdp/image)
+(require 2htdp/universe)
+
+;; an airplane animation:
+;; shows the flight of a fleet of airplanes from right to left, with the sun
+;; setting in the background
+;; adding one airplane for each keystroke of a user
+
+
+;; -----------------------------------------------------------------------------
+;; CONSTANTS
+(define PLANE .)
+
+(define SUN (circle 30 "solid" "orange"))
+
+
+(define WIDTH   800)
+(define HEIGHT  400)
+(define DELTA-X 3)
+(define BG   (empty-scene WIDTH HEIGHT))
+
+;; ------------------------------------------------------
+;; Data Definitions
+(define-struct sunset-planes (sun lop))
+;; A SPS-World is a (make-sunset-planes Posn LOP)
+
+;; A LOP (list of posn) is one of:
+;; - '()
+;; - (cons Posn LOP)
+ 
+(define world0 (make-sunset-planes (make-posn 20 (/ HEIGHT 2)) '()))
+(define world1 (make-sunset-planes (make-posn 300 400)
+                                   (cons (make-posn WIDTH 200)
+                                         (cons (make-posn WIDTH 300) '()))))
+
+#;(define (world-temp w)
+  ...(sunset-planes-sun w)
+  ...(lop-temp (sunset-planes-lop w))...)
+      
+#;(define (lop-temp alop)
+  (cond [(empty? alop) ...]
+        [else ... (posn-temp (first alop))
+              ... (lop-temp (rest alop))]))
+
+#;(define (posn-temp aposn)
+  ...(posn-x aposn)
+  ...(posn-y aposn) ...)
+
+;; SPS-World -> SPS-World
+;; launch the animation
+#;(define (main w)
+  (big-bang w
+            [to-draw draw-world]
+            [on-tick move-world]
+            [on-key add-plane]))
+
+;; draw-world: SPS-World -> Image
+;; draw the planes and sun onto the scene
+(check-expect (draw-world world0)
+              (place-image SUN 20 (/ HEIGHT 2) BG))
+(check-expect (draw-world world1)
+              (place-image SUN 300 400
+                           (place-image PLANE WIDTH 200
+                                        (place-image PLANE WIDTH 300 BG))))
+(define (draw-world w)
+  (place-image SUN
+               (posn-x (sunset-planes-sun w))
+               (posn-y (sunset-planes-sun w))
+               (draw-planes (sunset-planes-lop w))))
+
+;; draw-planes: LOP -> Image
+;; draw the planes onto the background
+(check-expect (draw-planes '()) BG)
+(check-expect (draw-planes (cons (make-posn WIDTH 200)
+                                 (cons (make-posn WIDTH 300) '())))
+              (place-image PLANE WIDTH 200
+                           (place-image PLANE WIDTH 300 BG)))
+(define (draw-planes alop)
+  (cond [(empty? alop) BG]
+        [else (draw-plane (first alop)
+                          (draw-planes (rest alop)))]))
+
+;; Posn Image -> Image
+;; draw the plane onto the image
+(check-expect (draw-plane (make-posn WIDTH 300) BG)
+              (place-image PLANE WIDTH 300 BG))
+(define (draw-plane aposn im)
+  (place-image PLANE
+               (posn-x aposn)
+               (posn-y aposn) im))
+
+;; move-world: 

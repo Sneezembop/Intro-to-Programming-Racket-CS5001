@@ -1,0 +1,21 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname lab-problems) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; #########################################
+;; PROBLEM 1
+;; #########################################
+
+;; A Cent is a NonNegInt
+;; WHERE: 0 <= cent <= 99
+;; INTERP: represents cents in a price
+;;
+;; A Dollar is a NonNegInt
+;; INTERP: represents dollars in a price
+
+(define-struct price(dollars cents))
+;; A Price is a (make-price dollars cents)
+;; INTERP: represents the price of an item in dollars and cents
+;;
+;; A List of Prices(LoP) is one of:
+;; - empty
+;; - (cons Price LoP)

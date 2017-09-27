@@ -1,0 +1,23 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname mutuallyRecursive) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+
+(define-struct person (name yob children))
+;; A Person is a (make-person String Number LoC)
+
+
+;; A LoC is one of
+;; - '()
+;; - (cons Person LoC)
+
+;; MUTUALLY RECURSIVE TEMPLATES
+
+#;(define (person-temp aper)
+    (... (person-name aper) ...
+         (person-yob aper) ...
+         (loc-temp (person-children aper)) ...))
+
+#; (define (loc-temp aloc)
+     (cond [(empty? aloc) ...]
+           [(cons? aloc) ...(person-temp (first aloc))
+                         ...(loc-temp (rest aloc))]))

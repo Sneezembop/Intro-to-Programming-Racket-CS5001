@@ -1,0 +1,132 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Assignment7) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; Module 6 - Assignment 7
+
+;; #########################################
+;; FIBONACCI
+;; #########################################
+
+;; fibonacci : Number -> Number
+;; returns the fibonacci number of the input
+(check-expect (fibonacci 0) 0)
+(check-expect (fibonacci 1) 1)
+(check-expect (fibonacci 11) 89)
+(define (fibonacci n)
+  (cond [(= 0 n) 0]
+        [(= 1 n) 1]
+        [else (+ (fibonacci (- n 1)) (fibonacci (- n 2)))]))
+
+;; fibon-accu : Number -> Number
+;; returns the fibonacci number of the input
+;; uses an accumulator
+(check-expect (fibon-accu 0) 0)
+(check-expect (fibon-accu 1) 1)
+(check-expect (fibon-accu 11) 89)
+(define (fibon-accu n)
+  (local [;; Number Accumulator Accumulator -> Number
+          ;; calculates the fibonacci number
+          ;; accu: keeps the previous two fibonacci numbers
+          (define (fibonacci n accu1 accu2)
+            (cond [(= 0 n) accu2]
+                  [else (fibonacci (- n 1)
+                                   (+ accu1 accu2)
+                                   accu1)]))]
+    (fibonacci n 1 0)))
+
+;; #########################################
+;; TWITTER
+;; #########################################
+
+;; A Twitter-User (TU) is a:
+;; (make-tu String List<String>)
+(define-struct tu (name tweeps))
+
+;; A Network is one of:
+;; - Empty
+;; - List<TU>
+
+(define mike (make-tu "mIk3" '()))
+(define chris (make-tu "chr1$" (list "mIk3")))
+(define sam (make-tu "XxX_Sam_XxX" (list "mIk3" "chr1$")))
+(define archie (make-tu "GandalfTheGrey"
+                        (list "XxX_Sam_XxX" "chr1$" "IAmTheTom")))
+(define tom (make-tu "IAmTheTom"
+                     (list "mIk3" "chr1$" "XxX_Sam_XxX" "GandalfTheGrey")))
+
+(define anetwork (list mike chris sam archie tom))
+(define bnetwork (list mike chris))
+
+;; list-handles : Network -> List<String>
+;; produces a list of all the handles in the network
+(check-expect (list-handles anetwork)
+              (list "mIk3" "chr1$" "XxX_Sam_XxX" "GandalfTheGrey" "IAmTheTom"))
+(define (list-handles anet)
+  (local [;; TU List<String> -> List<String>
+          ;; adds a TU's handle to the list
+          (define (add-handle atu accu)
+            (cons (tu-name atu) accu))]
+    (foldr add-handle '() anet)))
+
+
+;; most-followers : Network -> TU
+;; finds the user with the most followers
+(check-expect (most-followers anetwork) tom)
+(define (most-followers anet)
+  (local [;; TU TU -> TU
+          ;; returns the TU with the most followers
+          (define (more-followers atu btu)
+            (if (>= (length (tu-tweeps atu))
+                    (length (tu-tweeps btu)))
+                atu
+                btu))]
+    (foldr more-followers mike anet)))
+
+#;(define (most-followers anet)
+    (local [;; TU -> Real
+            ;; Returns the number of followers
+            (define (follower-count atu)
+              (length (tu-tweeps atu)))]
+      (argmax follower-count anet)))
+
+
+;; friends? : Network -> Boolean
+;; determines whether the network has two users who follow eachother
+(check-expect (friends? anetwork) #true)
+(check-expect (friends? bnetwork) #false)
+(define (friends? anet)
+    (local [;; TU TU -> Boolean
+            ;; sees if two users are friends with eachother
+            (define (mut-friends? atu btu)
+              (and (member? (tu-name atu) (tu-tweeps btu))
+                   (member? (tu-name btu) (tu-tweeps atu))))
+            ;; TU List<TU> -> Boolean
+            ;; sees if the user is friends with anyone on the list
+            (define (friend-list atu alist)
+              (cond [(empty? alist) #false]
+                    [else (or (mut-friends? atu (first alist))
+                               (friend-list atu (rest alist)))]))]
+      (cond [(empty? anet) #false]
+            [else (or (friend-list (first anet) anet)
+                       (friends? (rest anet)))])))
+
+;; #########################################
+;; PALINDROME
+;; #########################################
+
+;; make-palindrome : String -> String
+;; creates a palindrome from a string
+(check-expect (make-palindrome "fool") "foolloof")
+(define (make-palindrome astr)
+  (string-append astr (list->string (reverse (string->list astr)))))
+
+;; is-palindrome? : String -> Boolean
+;; determines if a string is a palindrome
+(check-expect (is-palindrome? "bloo") #false)
+(check-expect (is-palindrome? (make-palindrome "bloo")) #true)
+(define (is-palindrome? astr)
+  (string=? (substring astr 0 (/ (string-length astr) 2))
+            (list->string
+             (reverse
+              (string->list
+               (substring astr (/(string-length astr) 2)))))))

@@ -1,0 +1,111 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname Shrinking) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+
+;; ############################################
+;; Shrinking Baloons
+;; ############################################
+
+(require 2htdp/image)
+(require 2htdp/universe)
+ 
+(define WIDTH 500)
+(define HEIGHT WIDTH)
+(define BACKGROUND (empty-scene WIDTH HEIGHT))
+(define SHRINK-TIME0 10)
+(define SHRINK-TIME1 20)
+(define SHRINK-TIME2 30)
+
+; A ShrinkingWorld (SW) is a (make-shrinking Number Number Number)
+(define-struct shrinking (size time isize))
+; - where size is the size of the circle
+; - and time is the running time of the world
+; - and isize is the initial size of the circle
+ 
+(define initial-world (make-shrinking 50 0 50))
+(define intermediate-world (make-shrinking 70 10 80))
+(define world3 (make-shrinking 90 20 80))
+
+; draw-world : SW -> Image
+; Draws a red circle whose size depends on the world
+(check-expect (draw-world initial-world)
+              (place-image (circle
+                            (shrinking-size initial-world) "solid" "Yellow")
+                           (/ WIDTH 2) (/ HEIGHT 2) BACKGROUND))
+(check-expect (draw-world intermediate-world)
+              (place-image (circle
+                            (shrinking-size intermediate-world) "solid" "Red")
+                           (/ WIDTH 2) (/ HEIGHT 2) BACKGROUND))
+(define (draw-world world)
+  (place-image (circle (shrinking-size world) "solid" (colorize-cir world))
+               (/ WIDTH 2) (/ HEIGHT 2) BACKGROUND))
+
+;; colorize-cir : SW -> String
+;; Decides what color the circle should be based on how large it is
+(check-expect (colorize-cir initial-world)"Yellow")
+(check-expect (colorize-cir intermediate-world) "Red")
+(check-expect (colorize-cir world3) "Blue")
+(define (colorize-cir an-sw)
+  (cond [(= (shrinking-size an-sw) (shrinking-isize an-sw)) "Yellow"]
+        [(> (shrinking-size an-sw) (shrinking-isize an-sw)) "Blue"]
+        [(< (shrinking-size an-sw) (shrinking-isize an-sw)) "Red"]))
+
+; shrink-world : SW -> SW
+; Creates a new SW in which time has been incremented by 1
+; and the size has decreased
+(check-expect (shrink-world initial-world) (make-shrinking 49 1 50))
+(check-expect (shrink-world intermediate-world) (make-shrinking 68 11 80))
+(check-expect (shrink-world (make-shrinking 1 10 5)) (make-shrinking 1 11 5))
+(define (shrink-world an-sw)
+  (if (stop-sw? an-sw)
+      (make-shrinking (shrinking-size an-sw)
+                      (+ 1 (shrinking-time an-sw))
+                      (shrinking-isize an-sw))
+      (make-shrinking (- (shrinking-size an-sw)
+                     (shrink-rate (shrinking-time an-sw)))
+                  (+ 1 (shrinking-time an-sw))
+                  (shrinking-isize an-sw))))
+
+;; shrink-rate : Number -> Number
+;; checks for the rate at which the ball should shrink
+(check-expect (shrink-rate 5) 1)
+(check-expect (shrink-rate 15) 2)
+(check-expect (shrink-rate 25) 3)
+(check-expect (shrink-rate 35) 4)
+(define (shrink-rate time)
+  (cond [(< time SHRINK-TIME0) 1]
+        [(and (< time SHRINK-TIME1) (>= time SHRINK-TIME0)) 2]
+        [(and (< time SHRINK-TIME2) (>= time SHRINK-TIME1)) 3]
+        [(>= time SHRINK-TIME2) 4]))
+
+
+; grow-world : SW Number Number MouseEvent -> SW
+; Creates a new SW in which the size is slightly larger if the left
+; mouse button has been pressed
+(check-expect (grow-world initial-world 5 5 "button-down")
+              (make-shrinking 550 0 50))
+(check-expect (grow-world initial-world 5 5 "button-up") initial-world)
+(check-expect (grow-world initial-world 5 5 5) initial-world)
+(define (grow-world an-sw x y event)
+  (if (string? event)
+      (if (string=? event "button-down")
+          (make-shrinking (+ 500 (shrinking-size an-sw)) (shrinking-time an-sw)
+                          (shrinking-isize an-sw))
+          an-sw) an-sw))
+ 
+; stop-sw? : SW -> Boolean
+; Is the circle too small to shrink any more?
+(check-expect (stop-sw? initial-world) #false)
+(check-expect (stop-sw? (make-shrinking 4 150 4)) #true)
+(define (stop-sw? an-sw)
+  (if (< (shrinking-size an-sw) 5) #true #false))
+
+; shrink-baloon : SW -> SW
+; Run the game with this initial world
+(define (shrink-baloon world0)
+  (big-bang world0
+            (to-draw draw-world)
+            (on-tick shrink-world)
+            (on-mouse grow-world)))
+
+

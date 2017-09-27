@@ -1,0 +1,40 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname SunsetExample) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+(require 2htdp/image)
+(require 2htdp/universe)
+;; data definition (think about what is changing); in this case is position of the sun
+
+
+(define SUN insertimage)
+(define HEIGHT 400)
+(define WIDTH 600)
+(define BG (empty-scene HEIGHT WIDTH))
+
+
+;; Draw a sunset
+
+;; A SP (Sun Position) is a Number
+
+;; Number -> Image
+;; draw the sun at the given y-position
+(check-expect (draw-sun 10) (place-image SUN (/ WIDTH 3) 10 BG))
+(check-expect (draw-sun 150) (place-image SUN (/ WIDTH 3) 150 BG))
+(define (draw-sun n)
+  (place-image SUN (/ WIDTH 3) n BG))
+
+;(animate draw-sun)
+
+;; Number -> Number
+;; launches the sunset animation
+(define (main n)
+  (big-bang n
+            [to-draw draw-sun]
+            [on-tick change-y]))
+
+;; Number -> Number
+;; Increase(Change) the y-position at every tick
+(check-expect (change-y 1) 11)
+(check-expect (change-y 45) 55)
+(define (change-y n)
+  (+ n 10))

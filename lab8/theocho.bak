@@ -1,0 +1,85 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname theocho) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; ###############################################
+;; Public Transit
+;; ###############################################
+
+; A Station is a (make-station String [List-of String] [List-of String])
+(define-struct station [name lines neighbors])
+; - where name is the name of the station
+; - lines is the list of lines that this station is on
+; - and neighbors is the list of stations you can get to
+; - immediately from this one
+
+(define DOWNTOWN
+  (list (make-station "North Station" '("orange" "green") '("Haymarket"))
+        (make-station "Bowdoin" '("blue") '("Govt Center"))
+        (make-station "Haymarket" '("orange" "green")
+                      '("North Station" "Govt Center" "State"))
+        (make-station "Govt Center" '("green" "blue")
+                      '("Bowdoin" "Haymarket" "Park St" "State"))
+        (make-station "Aquarium" '("blue") '("State"))
+        (make-station "Park St" '("red" "green")
+                      '("Govt Center" "Boylston" "Downtown Crossing"))
+        (make-station "State" '("orange" "blue")
+                      '("Haymarket" "Govt Center" "Aquarium"
+                                    "Downtown Crossing"))
+        (make-station "Boylston" '("green") '("Park St"))
+        (make-station "Downtown Crossing" '("red" "orange")
+                      '("Park St" "State" "Chinatown" "South Station"))
+        (make-station "Chinatown" '("orange") '("Downtown Crossing"))
+        (make-station "South Station" '("red") '("Downtown Crossing"))))
+(define GREENLINE-SPLIT
+  (list (make-station "Copley" '("green")
+                      '("Arlington" "Prudential" "Hynes Convention Ctr"))
+        (make-station "Hynes Convention Ctr" '("green") '("Copley" "Kenmore"))
+        (make-station "Kenmore" '("green")
+                      '("Hynes Convention Ctr"
+                        "Blandford St" "St Marys St" "Fenway"))
+        (make-station "Prudential" '("green") '("Copley"))
+        (make-station "Blandford St" '("green") '("Kenmore"))
+        (make-station "St Marys St" '("green") '("Kenmore"))
+        (make-station "Fenway" '("green") '("Kenmore"))))
+
+
+; can-ride-in-time? : String String Number [List-of Station] -> Boolean
+; Can I get from a to b in time t?
+(check-expect (can-ride-in-time? "Chinatown" "Aquarium" 10 DOWNTOWN) true)
+(check-expect (can-ride-in-time? "Fenway" "Blandford St" 5 GREENLINE-SPLIT)
+              false)
+(define (can-ride-in-time? a b t the-map)
+  (local [(define the-station (get-station a the-map))]
+    (cond [(string=? a b) #true]
+          [else
+           (and (>= t 3)
+                (ormap
+                 (λ (neighbor) (can-ride-in-time? neighbor b (- t 3) the-map))
+                       (station-neighbors the-station)))])))
+ 
+; get-station : String [List-of Station] -> Station
+; Produces the first station with this name
+(define (get-station the-name the-map)
+  (cond [(empty? the-map) (error (string-append "Could not find station "
+                                                station-name))]
+        [(cons? the-map)
+         (if (string=? (station-name (first the-map)) the-name)
+             (first the-map) (get-station the-name (rest the-map)))]))
+
+;; all-possible-subsets : [List-of Station] -> [List-of [List-of String]]
+;; produces the powerset of all station names
+(define AJ-SPLIT (list (make-station "Reading Railroad" '("aj")
+                                     (list "Boardwalk"))
+                       (make-station "Boardwalk" '("aj")
+                                     (list "Reading Railroad" "Go!"))
+                       (make-station "Go!" '("aj")
+                                     (list "Reading Railroad"))))
+(check-expect (all-possible-subsets AJ-SPLIT)
+              '('() '("Reading Railroad") '("Boardwalk") '("Go!")
+                    '("Reading Railroad" "Boardwalk")
+                    '("Reading Railroad" "Go!")
+                    '("Boardwalk" "Go!")
+                    '("Reading Railroad" "Boardwalk" "Go!")))
+(define (all-possible-subsets the-map)
+  (cond [(empty? the-map) '()]
+        [else 

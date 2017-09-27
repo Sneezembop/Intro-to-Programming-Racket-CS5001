@@ -1,0 +1,35 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Assignment9) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; A Node is a Symbol 
+;; INTERP: represents the name of a node in a graph
+
+;; A Distance is a PosInt
+;; INTERP: represents distance in miles
+
+;; An Edge is (list Node Distance Node)
+;; e.g. (list 'A 10 'B)
+;; INTERP: represents an edge from 'A to 'B with the
+;;         distance from 'A to 'B being 10 miles
+
+;; A Path is a List<Edge>
+;; A Graph is a Set<Edge>
+;; NOTE: you can use the definition of Set from your previous assignment.
+
+
+(define te0 (list 'A 10 'B))
+(define te1 (list 'B 15 'C))
+(define te2 (list 'C 10 'D))
+(define te3 (list 'A 40 'D))
+
+(define test-path0 (list te0 te1 te2 te3))
+(define test-path1 (list te0 te2 te3))
+
+(define test-graph0 (list te0 te1 te2 te3))
+
+;; valid-path? : Graph Path -> Boolean
+;; returns true if the path can be followed in order on a given graph
+(check-expect (valid-path? test-graph0 test-path0) #true)
+(check-expect (valid-path? test-graph0 test-path1) #false)
+(define (valid-path? agra apath)
+  (

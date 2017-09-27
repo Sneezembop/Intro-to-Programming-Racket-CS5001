@@ -1,0 +1,165 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Assignment8) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;;> Total: 64/65
+
+;;> Use abstract definitions when possible.
+;;> Write purpose statements for local definitions.
+;; ##################################################
+;; List Chunks
+;; ##################################################
+
+
+
+;; list->chunks : List<X> Number -> List<List<X>>
+;; divides a list into smaller lists
+(check-expect (list->chunks '(a b c d e f) 3) (list '(a b c) '(d e f)))
+(check-expect (list->chunks '() 1) '())
+(check-expect (list->chunks '(a b c d e) 2) (list '(a b) '(c d) '(e)))
+(define (list->chunks alist chunksize)
+  (cond [(empty? alist) '()]
+        [(> chunksize (length alist)) (cons (make-chunks alist chunksize) '())]
+        [else (cons (make-chunks alist chunksize)
+                    (list->chunks
+                     (remove-elements alist chunksize) chunksize))]))
+
+;; make-chunks : List<X> Number -> List<X>
+;; returns a list comprised of the first N elements of a list
+(check-expect (make-chunks '(a b c d) 3) '(a b c))
+(define (make-chunks alist chunksize)
+  (cond [(or (= 0 chunksize)
+             (empty? alist)) '()]
+        [else (cons (first alist) (make-chunks (rest alist) (- chunksize 1)))]))
+
+
+
+;; remove-elements : List<X> Number -> List<X>
+;; returns a list with the first N elements removed
+(check-expect (remove-elements '(a b c d) 3) '(d))
+(define (remove-elements alist removalct)
+  (cond [(or (= 0 removalct)
+             (empty? alist)) alist]
+        [else (remove-elements (rest alist) (- removalct 1))]))
+
+
+;; ##########################################################
+;; DNA
+;; ##########################################################
+
+;; dna-encode : String -> String
+;; encodes a DNA sequence for easier storage and communication
+(check-expect (dna-encode "AAGCCCTTAAAAAAAAAA") "A2G1C3T2A10")
+(check-expect (dna-encode "") "")
+(define (dna-encode sequence)
+  (if (not (string=? "" sequence))
+      (string-append (string-ith sequence 0)
+                     (number->string (ele-count (string->list sequence)))
+                     (dna-encode
+                      (list->string
+                       (remove-elements
+                        (string->list sequence)
+                        (ele-count (string->list sequence))))))
+      ""))
+
+
+;; ele-count : List<X> -> Number
+;; returns how many times the first element of a list is repeated
+(check-expect (ele-count '(A A A A A C)) 5)
+(check-expect (ele-count '(A C C D)) 1)
+(check-expect (ele-count '()) 0)
+(define (ele-count alist)
+  (cond [(empty? alist) 0]
+        [(> 2 (length alist)) 1]
+        [else
+         (if (equal? (first alist) (first (rest alist)))
+             (+ 1 (ele-count (rest alist)))
+             1)]))
+
+;; dna-decode : String -> String
+;; decodes an encoded DNA string for use
+(check-expect (dna-decode "A2G1C3T2A10") "AAGCCCTTAAAAAAAAAA")
+(check-expect (dna-decode "A2") "AA")
+(check-expect (dna-decode "") "")
+(define (dna-decode sequence)
+    (cond [(string=? "" sequence) ""]
+         [else (string-append
+                (char-repeater
+                 (string-ith sequence 0)
+                 (get-char-count (explode sequence)))
+                (dna-decode
+                 (remove-first-pair sequence
+                                    (string-ith sequence 0)
+                                    (get-char-count (explode sequence)))))]))
+
+
+;; char-repeater : String Number -> String
+;; repeates the first character in the string N times
+(check-expect (char-repeater "A" 5) "AAAAA")
+(define (char-repeater ach num)
+  (cond [(= 0 num) ""]
+        [else (string-append ach (char-repeater ach (- num 1)))]))
+
+;; get-char-count : List<String> -> Number
+;; gets the first numeric value listed in an exploded string
+(check-expect (get-char-count (list "A" "3" "5" "8" "C" "3" "4")) 358)
+(check-expect (get-char-count (list "A" "B" "C" "D" "E" "F")) 0)
+(define (get-char-count alist)
+  (local [;; List<String> -> List<String>
+          (define (parse-list blist)
+            (cond[(empty? blist) '()]
+                 [(string-numeric? (first blist))
+                  (cons (first blist) (parse-list (rest blist)))]
+                 [else '()]))]
+    (list->number (parse-list (rest alist)))))
+
+
+;; list->number : List<String> -> Number
+;; converts a list of String'd Numbers into a single number
+(check-expect (list->number '("3" "5")) 35)
+(check-expect (list->number '()) 0)
+(define (list->number alist)
+  (local [;; List<String> ACC -> Number
+          ;; ACC: the current total
+          (define (numberize alist anum)
+            (cond[(empty? alist) anum]
+                 [else
+                  (numberize (rest alist)
+                             (+ anum
+                                (* (string->number (first alist))
+                                   (expt 10 (- (length alist) 1)))))]))]
+    (numberize alist 0)))
+
+;; remove-first-pair : String String(single char) Number -> String
+;; removes the char and number from the beginning of the string
+(check-expect (remove-first-pair "A35C34" "A" 35) "C34")
+(check-expect (remove-first-pair "A25" "A" 25) "")
+(check-expect (remove-first-pair "" "A" 25) "")
+(define (remove-first-pair astr achar num)
+  (if (<= 2 (string-length astr))
+      (substring astr (string-length
+                       (string-append achar (number->string num))))
+      ""))
+
+
+;; #################################################
+;; Bubble Sort
+;; #################################################
+
+
+;; bubble-sort : List<Number> -> List<Number>
+;; sorts a list of numbers from greatest to smallest
+(check-expect (bubble-sort '(1 2 5 8 9 3 7)) '(1 2 3 5 7 8 9))
+(check-expect (bubble-sort '(9 8 7 6 5 4 3 2 1 0)) '(0 1 2 3 4 5 6 7 8 9))
+(define (bubble-sort alist)
+  (local [;; List<Number> -> List<Number>
+          (define (bubble blist)
+            (foldr (λ (x lst) (cond [(empty? lst) (cons x lst)]
+                                    [else (if (>= x (first lst))
+                                              (append (list (first lst) x)
+                                                      (rest lst))
+                                              (cons x lst))])) '() blist))
+          (define bub-list (bubble alist))]
+    (if (not (equal? alist bub-list))
+        (bubble-sort bub-list)
+        alist)))
+

@@ -1,0 +1,715 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname Problemset) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+;;> Total: 69/70 - Good job!
+;;> No black lines: 10/10
+
+;;> Problem 1: purpose statement could be usd->eur : PosNum -> PosNum
+;;> Problem 4: Missing template for game (-1)
+;;> Problem 5: Be sure to write a template for all structs.
+;;> Missing template for amount
+
+;;> Problem 6:
+;;> Templates for nested data defs should look like:
+
+;; Template
+#; (define (temp-con acon)
+     (... (conference-title acon)...
+          (author-fn (conference-author acon)) ...
+          (conference-cname acon) ...
+          (conference-location acon) ...
+          (month-fn (conference-month acon)) ...
+          (year-fn (conference-year acon)) ...))
+;; ##############################
+;; PROBLEM 1
+;; ##############################
+
+;; usd->eur : Number -> Number
+;; Converts dollars to euros
+(check-expect (usd->eur 1) 0.89)
+
+(define (usd->eur dollars)
+  (* dollars 0.89))
+
+;; ##############################
+;; PROBLEM 2
+;; ##############################
+
+;; A CartesianPoint is (make-ca-point (Integer Integer))
+;; INTERP: represents a cartesian point with its x and y coordinates
+(define-struct ca-point (x-coord y-coord))
+
+#; (define (temp-ca acp)
+     (... (ca-point-x-coord acp)
+          ... (ca-point-y-coord acp)))
+
+(define point1 (make-ca-point 3 5))
+(define point2 (make-ca-point 1 2))
+(define point3 (make-ca-point 9 8))
+
+;; ca-distance: CartesianPoint CartesianPoint -> Number
+;; INTERP: finds the distance between two points in space
+(check-within (ca-distance point1 point2) 3.6 0.1)
+(check-within (ca-distance point1 point3) 6.7 0.1)
+(check-expect (ca-distance point3 point2) 10)
+
+(define (ca-distance point1 point2)
+  (sqrt (+ (sqr (- (ca-point-x-coord point2) (ca-point-x-coord point1)))
+           (sqr (- (ca-point-y-coord point2) (ca-point-y-coord point1))))))
+
+;; ##############################
+;; PROBLEM 3
+;; ##############################
+
+;; grade-mapper: Number -> String
+;; INTERP: converts a numberical grade to a letter grade
+(check-expect (grade-mapper 95) "A")
+(check-expect (grade-mapper 93) "A-")
+(check-expect (grade-mapper 87) "B+")
+(check-expect (grade-mapper 82) "B-")
+(check-expect (grade-mapper 78) "C+")
+(check-expect (grade-mapper 73) "C-")
+(check-expect (grade-mapper 65) "D")
+(check-expect (grade-mapper 55) "E")
+(check-expect (grade-mapper 155) "Invalid Grade")
+(define (grade-mapper grade)
+  (cond [(and (< 94 grade)(<= grade 100)) "A"]
+        [(and (< 90 grade)(<= grade 94)) "A-"]
+        [(and (< 85 grade)(<= grade 90)) "B+"]
+        [(and (< 80 grade)(<= grade 85)) "B-"]
+        [(and (< 75 grade)(<= grade 80)) "C+"]
+        [(and (< 70 grade)(<= grade 75)) "C-"]
+        [(and (< 60 grade)(<= grade 70)) "D"]
+        [(<= grade 60) "E"]
+        [else "Invalid Grade"]))
+
+;; ##############################
+;; PROBLEM 4
+;; ##############################
+
+(define-struct student (name id grade))
+;; A Student is (make-student String PosInt PosInt)
+;; INTER: represents a student with the student's name 
+;;        the student's id and the student's grade.
+
+;; student-name: Student -> String
+;; Returns the name value of a student
+
+;; student-id: Student -> PosInt
+;; Returns the ID value of a student
+
+;; student-grade: Student -> PosInt
+;; Returns the Grade value ofa  student
+
+;; make-student: String PosInt PosInt -> Student
+;; Creates a student struct from their information
+
+;; student?: Anything -> Boolean
+;; Checks to see if input is a Student
+
+#; (define (temp-student astu)
+     (... (student-name astu) ... (student-id astu) ... (student-grade astu)))
+
+(define-struct container (width height depth capacity label))
+;; A Container is (make-container PosInt PosInt PosInt PosInt Symbol)
+;; INTERP: represents a container with its width, height, depth 
+;;         in centimeters, it's capacity in cubic centimeters and 
+;;         it's label
+
+;; container-width: Container -> PosInt
+;; Returns the width value of a Container
+
+;; container-height: Container -> PosInt
+;; Returns the height value of a Container
+
+;; container-depth: Container -> PosInt
+;; Returns the depth value of a Container
+
+;; container-capacity: Container -> PosInt
+;; Returns the capacity value of a Container
+
+;; container-label: Container -> Symbol
+;; Returns the label value of a Container
+
+;; make-container: PosInt PosInt PosInt PosInt Symbol -> Container
+;; creates a container struct from it's constituants
+
+;; container?: Anything -> Boolean
+;; Checks to see if input is a Container
+
+#; (define (temp-container acon)
+     (... (container-width acon)
+          (container-height acon)
+          (container-depth acon)
+          (container-capacity acon)
+          (container-label acon)...))
+
+(define-struct sweater (material size producer))
+;; A Sweater is (make-sweater Symbol PosInt String)
+;; INTERP: represents a sweater with the sweater's material 
+;;         it's size and the name of the manufacturer
+
+;; sweater-material: Sweater -> Symbol
+;; Returns the material value of a Sweater
+
+;; sweater-size: Sweater -> PosInt
+;; Returns the size value of a Sweater
+
+;; sweater-producer: Sweater -> String
+;; Returns the producer value of a Sweater
+
+;; make-sweater: Symbol PosInt String -> Sweater
+;; Creates a Sweater from it's constituants
+
+;; sweater?: Anything -> Boolean
+;; Checks to see if input is a Sweater
+
+#; (define (temp-sweater asw)
+     (... (sweater-material asw)
+          (sweater-size asw)
+          (sweater-producer asw)...))
+
+(define-struct game (name min-ram min-graphics-ram online?))
+;; A Game is (make-game String PosInt PosInt Boolean)
+;; INTERP: represents a game with it's name, the minimum ram 
+;;         capacity needed , the minimum graphics 
+;;         card memory needed and whether it is an online game or not
+
+;; game-name: Game -> String
+;; Returns the name value of a Game
+
+;; game-min-ram: Game -> PosInt
+;; Returns the min-ram value of a Game
+
+;; game-min-graphics-ram: Game -> PosInt
+;; Returns the min-graphics-ram value of a Game
+
+;; game-online?: Game -> Boolean
+;; Returns whether the game is played online or not
+
+;; make-game: String PosInt PosInt Boolean -> Game
+;; creates a Game out of it's constituants
+
+;; game?: Anything -> Boolean
+;; Checks to see if input is a Game
+
+;; ##############################
+;; PROBLEM 5
+;; ##############################
+
+;; Dollars is a PosInt
+
+;; Cents is a PosInt 
+;; WHERE: Cents is greater or equal to 0 
+;;        and less or equal to 99
+
+(define-struct amount (dollars cents))
+;; An Amount is (make-amount Dollars Cents)
+;; INTERP: represents total amount in dollars and cents.
+(define amt1 (make-amount 5 50))
+(define amt2 (make-amount 3 75))
+(define amt3 (make-amount 1 25))
+
+;; add-to-amount: Amount Dollars Cents -> Amount
+;; Adds the new Dollars and Cents to the current Amount
+(check-expect (add-to-amount amt1 4 50) (make-amount 10 0))
+(check-expect (add-to-amount amt2 1 75) amt1)
+(check-expect (add-to-amount amt3 2 50) amt2)
+(define (add-to-amount amt dol cen)
+  (if (<= 100 (+ (amount-cents amt) cen))
+      (make-amount (+ (amount-dollars amt) dol 1)
+                   (- (+ (amount-cents amt) cen) 100))
+      (make-amount (+ (amount-dollars amt) dol)
+                   (+ (amount-cents amt) cen))))
+
+
+
+;; ##############################
+;; PROBLEM 6
+;; ##############################
+
+;;; Data Definitions 
+(define-struct official (first middle last title))
+;; An OfficialName is (make-official String String String String)
+;; INTERP: represents a person's official name with first, middle, last name
+;;         and title.
+
+#; (define (official-temp anoff)
+     (... (official-first anoff) ...
+          (official-middle anoff) ...
+          (official-last anoff) ....
+          (official-title anoff)...))
+
+;;; Data Examples
+(define JOHN-OFFICIAL (make-official "John" "D." "Doe" "PhD"))
+
+
+
+(define-struct full (first last))
+;; A FullName is a (make-full String String)
+;; INTERP: represents a person's name with first and last name. 
+
+;; Template
+#; (define (temp-full afull)
+     (... (full-first afull) ...
+          (full-last afull)...))
+
+;;; Data Examples
+(define JOHN-FULL (make-full "John" "Doe"))
+
+;; An Author is one of
+;; - OfficialName
+;; - FullName
+;; INTERP: represents the name of an author for a publication as either
+;;         a full name (first and last) or an offical name (first, middle, last
+;;         and title)
+
+;; Template
+#; (define (temp-author anauth)
+     (cond [(full? anauth)(... (full-first anauth)...
+                               (full-last anauth)...)]
+           [(official? anauth)(... (official-first anauth) ...
+                                   (official-middle anauth) ...
+                                   (official-last anauth) ....
+                                   (official-title anauth)...)]))
+
+
+;; A Year is a PosInt
+;; WHERE: Year is a 4 digit number
+;; INTERP: represents a calendar year. 
+
+;; A Month is one of
+;; - 'Jan
+;; - 'Feb
+;; - 'Mar
+;; - 'Apr
+;; - 'May
+;; - 'Jun
+;; - 'Jul
+;; - 'Aug
+;; - 'Sep
+;; - 'Oct
+;; - 'Nov
+;; - 'Dec
+;; INTERP: represents a month in a calendar year. 
+
+;; Template
+#; (define (temp-month amon)
+     (cond [(symbol=? amon 'Jan)...]
+           [(symbol=? amon 'Feb)...]
+           [(symbol=? amon 'Mar)...]
+           [(symbol=? amon 'Apr)...]
+           [(symbol=? amon 'May)...]
+           [(symbol=? amon 'Jun)...]
+           [(symbol=? amon 'Jul)...]
+           [(symbol=? amon 'Aug)...]
+           [(symbol=? amon 'Sep)...]
+           [(symbol=? amon 'Oct)...]
+           [(symbol=? amon 'Nov)...]
+           [(symbol=? amon 'Dec)...]))
+
+
+(define-struct conference (title author cname location month year))
+;; A Conference is (make-conference String Author String String Month Year)
+;; INTERP: represents a conference paper with title, author, conference name,
+;;         conference location, month and year
+
+;;; Data Examples
+(define JOHN-FULL-CONF (make-conference "Anatomy of a mouse"
+                                        JOHN-FULL
+                                        "Animal Anatomy"
+                                        "London, UK"
+                                        'Jul
+                                        2003))
+(define JOHN-OFFICIAL-CONF (make-conference "Anatomy of a mouse"
+                                            JOHN-OFFICIAL
+                                            "Animal Anatomy"
+                                            "London, UK"
+                                            'Jul
+                                            2003))
+
+
+;; Template
+#; (define (temp-con acon)
+     (... (conference-title acon)...
+          (conference-author acon) ...
+          (conference-cname acon) ...
+          (conference-location acon) ...
+          (conference-month acon) ...
+          (conference-year acon) ...))
+
+;; An Issue is a PosInt
+;; INTERP: represents a journal's issue number
+
+(define-struct journal (title author jname issue month year))
+;; A Journal is (make-journal String Author String Issue Month Year)
+;; INTERP: represents a journal paper with title, author, journal name,
+;;         month and year.
+
+;;; Data Examples
+(define JOHN-FULL-JOURNAL  (make-journal "Anatomy of a mouse"
+                                         JOHN-FULL
+                                         "Mouse Journal"
+                                         23
+                                         'Feb
+                                         2002))
+
+(define JOHN-OFFICIAL-JOURNAL  (make-journal "Anatomy of a mouse"
+                                             JOHN-OFFICIAL
+                                             "Mouse Journal"
+                                             23
+                                             'Feb
+                                             2002))
+
+;; Template:
+#; (define (temp-jour ajour)
+     (... (journal-title ajour) ...
+          (journal-author ajour) ...
+          (journal-jname ajour) ...
+          (journal-issue ajour) ...
+          (journal-month ajour) ...
+          (journal-year ajour) ...))
+
+
+(define-struct techreport (title author tr-id institution year))
+;; A TechnicalReport is (make-techreport String Author PosInt String Year)
+;; INTERP: represents a technical report with title, author,
+;;         technical report id, institution name, month and year.
+
+
+;;; Data Examples
+
+(define JOHN-FULL-TR (make-techreport "Anatomy of a mouse"
+                                      JOHN-FULL
+                                      1234
+                                      "Mouse University"
+                                      2001))
+
+
+(define JOHN-OFFICIAL-TR (make-techreport "Anatomy of a mouse"
+                                          JOHN-OFFICIAL
+                                          1234
+                                          "Mouse University"
+                                          2001))
+
+
+;; Template
+#; (define (temp-tr atr)
+     (... (techreport-title atr) ...
+          (techreport-author atr) ...
+          (techreport-tr-id atr) ...
+          (techreport-institution atr) ...
+          (techreport-year atr) ...))
+
+;; A Publication is one of
+;; - Conference
+;; - Journal
+;; - TechnicalReport
+;; INTERP: represents a publication as either a confrence, journal or
+;;         technical report. 
+
+;; Template
+#; (define (temp-pub apub)
+     (cond [(conference? apub) (... (conference-title apub)...
+                                    (conference-author apub) ...
+                                    (conference-cname apub) ...
+                                    (conference-location apub) ...
+                                    (conference-month apub) ...
+                                    (conference-year apub) ...)]
+           [(journal? apub) (... (journal-title apub) ...
+                                 (journal-author apub) ...
+                                 (journal-jname apub) ...
+                                 (journal-issue apub) ...
+                                 (journal-month apub) ...
+                                 (journal-year apub) ...)]
+           [(techreport? apub) (... (techreport-title apub) ...
+                                    (techreport-author apub) ...
+                                    (techreport-tr-id apub) ...
+                                    (techreport-institution apub) ...
+                                    (techreport-year apub) ...)]))
+
+;; tr->journal: TechReport String Issue Month Year -> Journal
+;; INTERP: converts a TechReport into a Journal publication
+(check-expect (tr->journal JOHN-FULL-TR "New TR Journal" 13 'jun 1997)
+              (make-journal (techreport-title JOHN-FULL-TR)
+                            (techreport-author JOHN-FULL-TR)
+                            "New TR Journal" 13 'jun 1997))
+(define (tr->journal atr jname issue month year)
+  (make-journal (techreport-title atr) (techreport-author atr)
+                jname issue month year))
+
+;; publication->image: Publication -> Image
+;; INTERP: creates a formatted text image of the publication information
+(check-expect (publication->image JOHN-FULL-TR)
+              (beside
+               (text/font
+                (string-append "\""
+                               (techreport-title JOHN-FULL-TR) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string (techreport-author JOHN-FULL-TR)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (techreport-institution JOHN-FULL-TR) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string(techreport-tr-id JOHN-FULL-TR)) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string (techreport-year JOHN-FULL-TR)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+(check-expect (publication->image JOHN-OFFICIAL-TR)
+              (beside
+               (text/font
+                (string-append
+                 "\"" (techreport-title JOHN-OFFICIAL-TR) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string
+                  (techreport-author JOHN-OFFICIAL-TR)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (techreport-institution JOHN-OFFICIAL-TR) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string
+                  (techreport-tr-id JOHN-OFFICIAL-TR)) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string
+                  (techreport-year JOHN-OFFICIAL-TR)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+(check-expect (publication->image JOHN-FULL-JOURNAL)
+              (beside
+               (text/font
+                (string-append
+                 "\"" (journal-title JOHN-FULL-JOURNAL) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string
+                  (journal-author JOHN-FULL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (journal-jname JOHN-FULL-JOURNAL) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string (journal-issue JOHN-FULL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (month-string (journal-month JOHN-FULL-JOURNAL)) ", ")
+                20 "black" #false 'modern 'normal 'bold #false)
+               (text/font
+                (string-append
+                 (number->string
+                  (journal-year JOHN-FULL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+(check-expect (publication->image JOHN-OFFICIAL-JOURNAL)
+              (beside
+               (text/font
+                (string-append
+                 "\"" (journal-title JOHN-OFFICIAL-JOURNAL) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string
+                  (journal-author JOHN-OFFICIAL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (journal-jname JOHN-OFFICIAL-JOURNAL) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (number->string (journal-issue JOHN-OFFICIAL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (month-string (journal-month JOHN-OFFICIAL-JOURNAL)) ", ")
+                20 "black" #false 'modern 'normal 'bold #false)
+               (text/font
+                (string-append
+                 (number->string (journal-year JOHN-OFFICIAL-JOURNAL)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+(check-expect (publication->image JOHN-FULL-CONF)
+              (beside
+               (text/font
+                (string-append
+                 "\"" (conference-title JOHN-FULL-CONF) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string (conference-author JOHN-FULL-CONF)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (conference-cname JOHN-FULL-CONF) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (conference-location JOHN-FULL-CONF) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (month-string (conference-month JOHN-FULL-CONF)) ", ")
+                20 "black" #false 'modern 'normal 'bold #false)
+               (text/font
+                (string-append
+                 (number->string (conference-year JOHN-FULL-CONF)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+(check-expect (publication->image JOHN-OFFICIAL-CONF)
+              (beside
+               (text/font
+                (string-append
+                 "\"" (conference-title JOHN-OFFICIAL-CONF) "\". ")
+                20 "Black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (author-string (conference-author JOHN-OFFICIAL-CONF)) ". ")
+                20 "black" #false 'modern 'normal 'normal #false)
+               (text/font
+                (string-append
+                 (conference-cname JOHN-OFFICIAL-CONF) ", ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (conference-location JOHN-OFFICIAL-CONF) ". ")
+                20 "black" #false 'modern 'italic 'normal #false)
+               (text/font
+                (string-append
+                 (month-string (conference-month JOHN-OFFICIAL-CONF)) ", ")
+                20 "black" #false 'modern 'normal 'bold #false)
+               (text/font
+                (string-append
+                 (number->string (conference-year JOHN-OFFICIAL-CONF)) ". ")
+                20 "black" #false 'modern 'normal 'bold #false)))
+
+(define (publication->image apub)
+  (cond [(conference? apub)
+         (beside
+          (text/font
+           (string-append
+            "\"" (conference-title apub) "\". ")
+           20 "Black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (author-string (conference-author apub)) ". ")
+           20 "black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (conference-cname apub) ", ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (conference-location apub) ". ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (month-string (conference-month apub)) ", ")
+           20 "black" #false 'modern 'normal 'bold #false)
+          (text/font
+           (string-append
+            (number->string (conference-year apub)) ". ")
+           20 "black" #false 'modern 'normal 'bold #false))]
+        [(journal? apub)
+         (beside
+          (text/font
+           (string-append
+            "\"" (journal-title apub) "\". ")
+           20 "Black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (author-string (journal-author apub)) ". ")
+           20 "black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (journal-jname apub) ", ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (number->string (journal-issue apub)) ". ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (month-string (journal-month apub)) ", ")
+           20 "black" #false 'modern 'normal 'bold #false)
+          (text/font
+           (string-append
+            (number->string (journal-year apub)) ". ")
+           20 "black" #false 'modern 'normal 'bold #false))]
+        [(techreport? apub)
+         (beside
+          (text/font
+           (string-append
+            "\"" (techreport-title apub) "\". ")
+           20 "Black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (author-string (techreport-author apub)) ". ")
+           20 "black" #false 'modern 'normal 'normal #false)
+          (text/font
+           (string-append
+            (techreport-institution apub) ", ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (number->string(techreport-tr-id apub)) ". ")
+           20 "black" #false 'modern 'italic 'normal #false)
+          (text/font
+           (string-append
+            (number->string (techreport-year apub)) ". ")
+           20 "black" #false 'modern 'normal 'bold #false))]))
+
+
+;; author-string : Author -> String
+;; converts an author into a printable string
+(check-expect (author-string JOHN-FULL) "John Doe")
+(check-expect (author-string JOHN-OFFICIAL) "PhD John D. Doe")
+(define (author-string anauth)
+  (cond [(full? anauth)(string-append
+                        (full-first anauth) " "(full-last anauth))]
+        [(official? anauth) (string-append (official-title anauth) " "
+                                           (official-first anauth) " "
+                                           (official-middle anauth) " "
+                                           (official-last anauth))]))
+
+;; month-string : Month -> String
+;; converts a month symbol into a printable string
+(check-expect (month-string 'Jan) "Jan")
+(check-expect (month-string 'Feb) "Feb")
+(check-expect (month-string 'Mar) "Mar")
+(check-expect (month-string 'Apr) "Apr")
+(check-expect (month-string 'May) "May")
+(check-expect (month-string 'Jun) "Jun")
+(check-expect (month-string 'Jul) "Jul")
+(check-expect (month-string 'Aug) "Aug")
+(check-expect (month-string 'Sep) "Sep")
+(check-expect (month-string 'Oct) "Oct")
+(check-expect (month-string 'Nov) "Nov")
+(check-expect (month-string 'Dec) "Dec")
+(define (month-string amon)
+  (cond [(symbol=? amon 'Jan)"Jan"]
+        [(symbol=? amon 'Feb)"Feb"]
+        [(symbol=? amon 'Mar)"Mar"]
+        [(symbol=? amon 'Apr)"Apr"]
+        [(symbol=? amon 'May)"May"]
+        [(symbol=? amon 'Jun)"Jun"]
+        [(symbol=? amon 'Jul)"Jul"]
+        [(symbol=? amon 'Aug)"Aug"]
+        [(symbol=? amon 'Sep)"Sep"]
+        [(symbol=? amon 'Oct)"Oct"]
+        [(symbol=? amon 'Nov)"Nov"]
+        [(symbol=? amon 'Dec)"Dec"]))
+
+

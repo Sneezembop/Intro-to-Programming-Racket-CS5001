@@ -1,0 +1,30 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Loop) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+;; #####################################
+;; Loop Functions
+;; #####################################
+
+
+(define usd-list (list 1.50 1 5.50))
+;; convert-euro : List-of-Number -> List-of-Number
+;; converts a list of USD values to EUR
+(check-expect (convert-euro usd-list) (list 1.83 1.22 6.71))
+(define (convert-euro alon )
+  (local [;; Number-> Number
+          ;; converts a USD value to EUR
+          (define (make-euro num)
+            (* 1.22 num))]
+    (map make-euro alon)))
+
+
+(define far-list (list -40 32 212))
+;; convertFC : List-of-Number -> List-of-Number
+;; converts a list of Fahrenheit values to Celsius
+(check-within (convertFC far-list) (list -40 0 100) .1)
+(define (convertFC alon)
+  (local [;; Number->Number
+          ;; converts Far to Cel
+          (define (conFC num)
+            (* (/ 5 9) (- num 32)))]
+    (map conFC alon)

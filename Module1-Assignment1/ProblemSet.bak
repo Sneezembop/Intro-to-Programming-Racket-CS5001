@@ -1,0 +1,180 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname ProblemSet) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+
+;; ##############################
+;; PROBLEM 1
+;; ##############################
+
+;; Frustum-Vol: Number, Number, Number -> Number
+;; Calculates the volume of a frustum based on it's physical dimensions
+(define (frustum-vol height uRadius lRadius)
+  (* 1/3 pi height
+     (+ (sqr uRadius)
+        (* uRadius lRadius)
+        (sqr lRadius))))
+
+(check-within (frustum-vol 2 3 3) 56.54 0.1)
+(check-within (frustum-vol 3 3 3) 84.82 0.1)
+
+;; Frustum-Surface: Number, Number, Number -> Number
+;; Calculates the total surface area of a frustum based on it's physical dimensions
+(define (frustum-surface height uRadius lRadius)
+  ( + (* pi uRadius uRadius)
+      (* pi lRadius lRadius)
+      (* pi
+         (+ uRadius lRadius)
+         (sqrt (+ (sqr (- uRadius lRadius))
+                  (sqr height))))))
+
+(check-within (frustum-surface 2 3 3) 94.24 0.1)
+
+;; ##############################
+;; PROBLEM 2
+;; ##############################
+
+;; Leap-Year?: Number -> Boolean
+;; Checks to see whether a given year is a leap year
+(define (leap-year? year)
+      (if (divisible-by? year 4)
+          (if (divisible-by? year 100) 
+              (if (divisible-by? year 400) true false)
+              true)
+          false))
+
+(check-expect (leap-year? 2004) true)
+(check-expect (leap-year? 1999) false)
+(check-expect (leap-year? 1900) false)
+(check-expect (leap-year? 1600) true)
+
+
+;; Divisible-By?: Number, Number -> Boolean
+;; Checks to see if a number is perfectly divisible by another number
+(define (divisible-by? bigNum smallNum)
+  (if (= 0 (remainder bigNum smallNum)) true false))
+
+(check-expect (divisible-by? 4 2) true)
+(check-expect (divisible-by? 5 2) false)
+
+;; ##############################
+;; PROBLEM 3
+;; ##############################
+
+;; String-Add-Prefix: String, String -> String
+;; Adds the 2nd string to the beginning of the first
+(define (string-add-prefix w p)
+      (string-append p w))
+
+(check-expect (string-add-prefix "define" "re-") "re-define")
+(check-expect (string-add-prefix "view" "re") "review")
+
+;; String-Add-Suffix: String, String -> String
+;; Adds the 1st string to the beginning of the second
+(define (string-add-suffix w s)
+  (string-add-prefix s w))
+
+(check-expect (string-add-suffix "game" "s") "games")
+(check-expect (string-add-suffix "low" "er") "lower")
+
+;; String-Join: String, String -> String
+;; Combines two strings with a "," between them
+(define (string-join string1 string2)
+  (string-add-suffix (string-add-suffix string1 ",") string2))
+
+(check-expect (string-join "This" "That") "This,That")
+(check-expect (string-join "is" " this") "is, this")
+
+;; ##############################
+;; PROBLEM 4
+;; ##############################
+
+;; Iff: Boolean, Boolean -> Boolean
+;; returns true is both booleans have the same value
+(define (iff bool1 bool2)
+      (if (equal? bool1 bool2) true false))
+
+(check-expect (iff true false) false)
+(check-expect (iff true true) true)
+(check-expect (iff false true) false)
+(check-expect (iff false false) true)
+
+;; ##############################
+;; PROBLEM 5
+;; ##############################
+
+;; Get-Tax-Rate: Number -> Number
+;; looks up the tax bracket of a specific salary
+(define (get-tax-rate income)
+      (cond
+        [(< income 9275) 10]
+        [(and (>= income 9275)(< income 37650)) 15]
+        [(and (>= income 37650)(< income 91150)) 25]
+        [(and (>= income 91150)(< income 190150)) 28]
+        [(and (>= income 190150)(< income 413350)) 33]
+        [(and (>= income 413350)(< income 415050)) 35]
+        [(>= income 415050) 39.6]))
+
+(check-expect (get-tax-rate 400) 10)
+(check-expect (get-tax-rate 14000) 15)
+(check-expect (get-tax-rate 40000) 25)
+(check-expect (get-tax-rate 140000) 28)
+(check-expect (get-tax-rate 400000) 33)
+(check-expect (get-tax-rate 414350) 35)
+(check-expect (get-tax-rate 4000000) 39.6)
+
+;; Calculate-Tax: Number -> Number
+;; Figures out how much someone owes in taxes based on income
+(define (calculate-tax income)
+      (* income (/ (get-tax-rate income) 100)))
+
+(check-expect (calculate-tax 400) 40)
+
+;; ##############################
+;; PROBLEM 6
+;; ##############################
+
+(require 2htdp/image)
+
+;; Define struct Text-Style
+;; A Text-Style is a Symbol, Number, String
+(define-struct text-style (name fontsize color))
+(define title-text(make-text-style 'title 36 "Blue"))
+(define body-text(make-text-style 'body 24 "Black"))
+(define code-text(make-text-style 'code 20 "Red"))
+(define default-text(make-text-style 'default 12 "black"))
+
+
+;; Look-Up-Style: Symbol -> Text-Style
+;; Looks up a Text-Style based on a given tag
+(define (look-up-style input)
+  (cond
+    [(symbol=? input 'title) title-text]
+    [(symbol=? input 'body) body-text]
+    [(symbol=? input 'code) code-text]
+    [else default-text]))
+
+(check-expect (look-up-style 'title) title-text)
+(check-expect (look-up-style 'body) body-text)
+(check-expect (look-up-style 'code) code-text)
+(check-expect (look-up-style 'other) default-text)
+
+;; Text-Stylize: String, Symbol -> Image
+;; Format text based on what style it's tagged as
+(define (text-stylize input style)
+      (text input (text-style-fontsize (look-up-style style)) (text-style-color (look-up-style style))))
+
+(check-expect (text-stylize "Title Test" 'title) (text "Title Test" 36 "blue"))
+(check-expect (text-stylize "Body Test" 'body) (text "Body Test" 24 "black"))
+(check-expect (text-stylize "Code Test" 'code) (text "Code Test" 20 "red"))
+
+;; ##############################
+;; PROBLEM 7
+;; ##############################
+
+;; Image>?: Image, Image -> Boolean
+;; checks to see if the first image is larger than the second
+(define (image>? image1 image2)
+      (if (and (> (image-width image1) (image-width image2)) (> (image-height image1) (image-height image2))) true false))
+
+(check-expect (image>? (circle 100 "solid" "red") (circle 50 "solid" "red")) true)
+(check-expect (image>? (circle 10 "solid" "red") (circle 50 "solid" "red")) false)

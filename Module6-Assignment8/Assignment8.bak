@@ -1,0 +1,29 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Assignment8) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp") (lib "gui.rkt" "teachpack" "htdp")) #f)))
+
+;; list->chunks : List<X> Number -> List<List<X>>
+;; divides a list into smaller lists
+(check-expect (list->chunks '(a b c d e f) 3) (list '(a b c) '(d e f)))
+(check-expect (list->chunks '() 1) '())
+(check-expect (list->chunks '(a b c d e) 2) (list '(a b) '(c d) '(e)))
+(define (list->chunks alist chunksize)
+  (cond [(empty? alist) '()]
+        [(> chunksize (length alist)) (cons (make-chunks alist chunksize) '())]
+        [else (cons (make-chunks alist chunksize)
+                    (list->chunks
+                     (remove-elements alist chunksize) chunksize))]))
+
+(check-expect (make-chunks '(a b c d) 3) '(a b c))
+(define (make-chunks alist chunksize)
+  (cond [(or (= 0 chunksize)
+             (empty? alist)) '()]
+        [else (cons (first alist) (make-chunks (rest alist) (- chunksize 1)))]))
+
+
+(check-expect (remove-elements '(a b c d) 3) '(d))
+(define (remove-elements alist removalct)
+(cond [(or (= 0 removalct)
+           (empty? alist)) alist]
+      [else (remove-elements (rest alist) (- removalct 1))]))
+

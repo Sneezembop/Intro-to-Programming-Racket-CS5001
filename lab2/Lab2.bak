@@ -1,0 +1,419 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname Lab2) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+;; ############################
+;; Notes
+;; ############################
+
+;; An Item is one of:
+;; -- Number
+;; -- Boolean
+;; -- (make-posn Number Number)
+
+#;(define (item-temp an-item)
+  (cond [(number? an-item) ...]
+        [(boolean? an-item) ...]
+        [(posn? an-item) ...(posn-x an-item)
+                         ...(posn-y an-item)]))
+
+
+;; ###########################
+;; LAB - STRUCTS
+;; ###########################
+
+(define-struct file(name extension size))
+;; A File is (make-file String Symbol NonNegInteger)
+;; INTERP: represents a file with the file name, the file extension and the file size
+
+
+;; make-file: String, Symbol, Number -> File
+;; creates a File from input data
+
+;; file-name: File -> String
+;; returns the name value of a File
+
+;; file-extension: File -> Symbol
+;; returns the extension symbol of a File
+
+;; file-size: File -> Nmber
+;; returns the size value of a File
+
+;; file?: Anything -> Boolean
+;; checks to see if a variable is of type File
+
+(define memo(make-file "memo" 'txt 50))
+(define file2(make-file "readme" 'txt 50))
+
+#;(define (file-temp a-file)
+  (... (file-name a-file) ... (file-extension a-file) ... (file-size a-file)))
+
+(define-struct program(name version extension size))
+;; A Program is (make-program String Number Symbol NonNegNumber)
+;; INTERP: represents a program with the program name, version number, prefered extension, and size 
+
+;; make-program: String Number Symbol Number -> Program
+;; creates a Program struct from it's constituants
+
+;; program-name: Program -> String
+;; returns a program's name value
+
+;; program-version: Program -> Number
+;; returns a program's version number
+
+;; program-extension: Program -> Symbol
+;; returns a program's prefered extension
+
+;; program-size: Program -> Number
+;; returns a program's size value
+
+;; program?: Anything -> Boolean
+;; checks to see if a variable is type Program
+
+(define msword(make-program "Microsoft Word" 1 'doc 150))
+(define msexcel(make-program "Microsoft Excel" 1 'xlm 250))
+
+#;(define (prog-temp a-program)
+  (... (program-name a-program)...
+       (program-version a-program)...
+       (program-extension a-program)...
+       (program-size a-program)...))
+
+(define file1 (make-file "thesis" 'doc 1234))
+
+;; Print-File: File -> String
+;; returns a string with the file's information
+(check-expect (print-file file1) "thesis.doc 1234")
+(define (print-file a-file)
+  (string-append(file-name a-file) "." (symbol->string (file-extension a-file)) " " (number->string (file-size a-file))))
+
+;; Change-Ext: File Symbol -> File
+;; changes the file's extension
+(check-expect (change-ext file1 'txt) (make-file "thesis" 'txt 1234))
+(define (change-ext f ext)
+  (make-file (file-name f) ext (file-size f)))
+
+;; Change-Size: File Number -> File
+;; changes the file's size
+(check-expect (change-size file1 50) (make-file "thesis" 'doc 50))
+(define (change-size f s)
+  (make-file (file-name f) (file-extension f) s))
+
+
+;; Print-Program: Program -> String
+;; returns a string with the program's information
+(check-expect (print-program msword) "Microsoft Word    1    .doc    150")
+(define (print-program p)
+  (string-append (program-name p) "    "
+                 (number->string (program-version p)) "    ."
+                 (symbol->string (program-extension p)) "    "
+                 (number->string (program-size p))))
+
+;; Update-Program: Program Number Number -> Program
+;; Updates a program with a new value for size and version
+(check-expect (update-program msword 2 250) (make-program "Microsoft Word" 2 'doc 250))
+(define (update-program p v s)
+  (make-program (program-name p) v (program-extension p) s))
+
+;; Compatible?: File Program -> Boolean
+;; Checks to see if a given program is responsible for a file of this type
+(check-expect (compatible? file1 msword) true)
+(check-expect (compatible? file1 msexcel) false)
+(define (compatible? f p)
+  (cond [(symbol=? (file-extension f) (program-extension p)) true]
+        [else false]))
+
+;; ###########################
+;; LAB - Itemizations
+;; ###########################
+
+
+;; A Media is one of
+;; - 'dvd
+;; - 'cd
+;; - 'blueray
+;; - 'floppy
+
+;; INTERP: represents each kind of media kept at the store
+
+#;(define (media-temp a-media)
+    (cond [(symbol=? a-media 'dvd) ...]
+          [(symbol=? a-media 'cd) ...]
+          [(symbol=? a-media 'blueray) ...]
+          [(symbol=? a-media 'floppy)...]))
+
+;; A Peripheral is one of
+;; - "keyboard"
+;; - "mouse"
+;; - "driving wheel"
+;; - "headset"
+;; - "controller"
+
+;; INTERP: represents each kind of peripheral kept at the store
+
+#;(define (perip-temp a-peripheral)
+    (cond [(string=? a-peripheral "keyboard") ...]
+          [(string=? a-peripheral "mouse") ...]
+          [(string=? a-peripheral "driving wheel") ...]
+          [(string=? a-peripheral "headset")...]
+          [(string=? a-peripheral "controller") ...]))
+
+
+;; Media?: Anything -> Boolean
+;; Checks to see if a given input is a kind of Media
+(check-expect (media? 'cd) #true)
+(check-expect (media? 'blueray) #true)
+(check-expect (media? 'dvd) #true)
+(check-expect (media? 'floppy) #true)
+(check-expect (media? 'bloop) #false)
+(check-expect (media? "blue") #false)
+(define (media? m)
+    (if (symbol? m)
+        (cond [(symbol=? m 'dvd) #true]
+          [(symbol=? m 'cd) #true]
+          [(symbol=? m 'blueray) #true]
+          [(symbol=? m 'floppy) #true]
+          [else #false])
+        #false))
+
+;; Peripheral?: Anything -> Boolean
+;; Checks to see if a given input is a kind of Peripheral
+(check-expect (peripheral? "keyboard") #true)
+(check-expect (peripheral? "mouse") #true)
+(check-expect (peripheral? "driving wheel") #true)
+(check-expect (peripheral? "headset") #true)
+(check-expect (peripheral? "controller") #true)
+(check-expect (peripheral? "joystick") #false)
+(check-expect (peripheral? 'blueray) #false)
+
+(define (peripheral? p)
+  (if (string? p)
+    (cond [(string=? p "keyboard") #true]
+          [(string=? p "mouse") #true]
+          [(string=? p "driving wheel") #true]
+          [(string=? p "headset") #true]
+          [(string=? p "controller") #true]
+          [else #false])
+    #false))
+
+;; Media-Tax: Media Number -> Number
+;; Calculates the amount of tax based on the price and item type
+(check-expect (media-tax 'dvd 100) 5)
+(check-expect (media-tax 'cd 100) 3)
+(check-expect (media-tax 'blueray 100) 7)
+(check-expect (media-tax 'floppy 100) 2)
+(define (media-tax media cost)
+  (cond [(symbol=? media 'dvd) (* cost 0.05)]
+          [(symbol=? media 'cd) (* cost 0.03)]
+          [(symbol=? media 'blueray) (* cost 0.07)]
+          [(symbol=? media 'floppy)(* cost 0.02)]))
+
+;; Peripheral-Tax: Peripheral Number -> Number
+;; Calculates the amount of tax based on the price and item type
+(check-expect (peripheral-tax "keyboard" 100) 2.5)
+(check-expect (peripheral-tax "mouse" 100) 1.5)
+(check-expect (peripheral-tax "driving wheel" 100) 3.5)
+(check-expect (peripheral-tax "headset" 100) 5.2)
+(check-expect (peripheral-tax "controller" 100) 6)
+(define (peripheral-tax a-peripheral cost)
+    (cond [(string=? a-peripheral "keyboard") (* cost 0.025)]
+          [(string=? a-peripheral "mouse") (* cost 0.015)]
+          [(string=? a-peripheral "driving wheel") (* cost 0.035)]
+          [(string=? a-peripheral "headset")(* cost 0.052)]
+          [(string=? a-peripheral "controller") (* cost 0.06)]))
+
+;; A MediaOrPeripheral is one of:
+;; -- Media
+;; -- Peripheral
+#; (define (temp-MorP a-MorP)
+     (cond [(media? a-MorP) ...]
+           [(peripheral? a-MorP) ...]))
+
+;; Tax-Lookup: MediaOrPeripheral Number -> Number
+;; Calculates the amount of tax for the given item and price
+(check-expect (tax-lookup "keyboard" 100) 2.5)
+(check-expect (tax-lookup 'cd 100) 3)
+(define (tax-lookup MorP cost)
+  (cond [(media? MorP) (media-tax MorP cost)]
+        [(peripheral? MorP) (peripheral-tax MorP cost)]))
+
+
+;; ###########################
+;; LAB - Itemizations w/ Structures
+;; ###########################
+
+;; An Outline is a Boolean
+;; INTERP: true means use outline for the shape, false means use solid
+#; (define (temp-out a-outline)
+     (... a-outline ...))
+
+
+(define-struct cir (radius color outline?))
+;; A Circle is (make-cir NonNegInteger Color Outline)
+;; INTERP: represents a circle with its radius, color and if it has an outline
+#; (define (temp-cir circle)
+     (... (cir-radius circle) ... (cir-color circle) ... (cir-outline? circle)))
+(define exCir (make-cir 50 "cyan" #false))
+
+(define-struct squ (side color outline?))
+;; A Square is (make-squ NonNegInteger Color Outline)
+;; INTERP: represents a square with its side, color and if it has an outline
+#; (define (temp-squ square)
+     (... (squ-side square) ... (squ-color square) ... (squ-outline? square)))
+(define exSqu (make-squ 100 "orange" #true))
+
+(define-struct rec (width height color outline?))
+;; A Rectangle is (make-rec NonNegInteger NonNegInteger Color Outline)
+;; INTERP: represents a rectangle with both dimensions, color and if it has an outline
+#; (define (temp-rec rectangle)
+     (... (rec-width rectangle) ... (rec-height rectangle) ... (rec-color rectangle) ... (rec-outline? rectangle)))
+(define exRec (make-rec 75 105 "purple" #false))
+
+(define-struct eqt (side color outline?))
+;; An EqTriangle is (make-eqt NonNegInteger Color Outline)
+;; INTERP: represents an equilatral triangle with the length of the side, color and outline
+#; (define (temp-eqt triangle)
+     (... (eqt-side triangle) ... (eqt-color triangle) ... (eqt-outline? triangle)))
+(define exEqt (make-eqt 60 "chartreuse" #true))
+
+
+;; A Shape is one of
+;; - Circle
+;; - Square
+;; - Rectangle
+;; - EqTriangle
+#; (define (temp-shape shape)
+     (cond [(squ? shape) (... (squ-side shape) ... (squ-color shape) ... (squ-outline? shape))]
+           [(cir? shape) (... (cir-radius shape) ... (cir-color shape) ... (cir-outline? shape))]
+           [(rec? shape) (... (rec-width shape) ... (rec-height shape) ... (rec-color shape) ... (rec-outline? shape))]
+           [(eqt? shape) (... (eqt-side shape) ... (eqt-color shape) ... (eqt-outline? shape))]))
+
+;; Shape->Image: Shape -> Image
+;; Given a Shape struct returns the appropriate image
+(require 2htdp/image)
+(check-expect (shape->image exCir) (circle 50 "solid" "cyan"))
+(check-expect (shape->image exSqu) (square 100 "outline" "orange"))
+(check-expect (shape->image exRec) (rectangle 75 105 "solid" "purple"))
+(check-expect (shape->image exEqt) (triangle 60 "outline" "chartreuse"))
+(define (shape->image ashape)
+  (cond [(squ? ashape) (square (squ-side ashape) (solidOrOutline (squ-outline? ashape)) (squ-color ashape))]
+        [(cir? ashape) (circle (cir-radius ashape) (solidOrOutline (cir-outline? ashape)) (cir-color ashape))]
+        [(rec? ashape) (rectangle (rec-width ashape) (rec-height ashape) (solidOrOutline (rec-outline? ashape)) (rec-color ashape))]
+        [(eqt? ashape) (triangle (eqt-side ashape) (solidOrOutline (eqt-outline? ashape)) (eqt-color ashape))]))
+
+;; SolidOrOutline: Boolean -> String
+;; returns whether a given shape should be "solid" or "outline"
+(check-expect (solidOrOutline #true) "outline")
+(check-expect (solidOrOutline #false) "solid")
+(define (solidOrOutline ashape)
+  (if ashape
+      "outline" "solid"))
+
+;; Shape->Area: Shape -> Number
+;; Given a Shape, calculates the area of the shape
+(check-expect (shape->area exSqu) (* 100 100))
+(check-expect (shape->area exRec) (* 75 105))
+(check-within (shape->area exEqt) (* 0.25 (sqrt 3) 60 60) 0.1)
+(check-within (shape->area exCir) (* pi 50 50) 0.1)
+(define (shape->area shape)
+  (cond [(squ? shape) (* (squ-side shape) (squ-side shape))]
+        [(cir? shape) (* (cir-radius shape) (cir-radius shape) pi)]
+        [(rec? shape) (* (rec-width shape) (rec-height shape))]
+        [(eqt? shape) (* (eqt-side shape) (eqt-side shape) (sqrt 3) 0.25)]))
+
+;; ###########################
+;; LAB - Structures w/ Itemizations
+;; ###########################
+
+;; A Degree is one of
+;; - 'MS
+;; - 'BSc
+;; - 'PhD
+;;INTERP: represents the degree the candidate is in
+#; (define (temp-degree degree)
+     (cond [(symbol=? degree 'MS) ...]
+           [(symbol=? degree 'BSc) ...]
+           [(symbol=? degree 'PhD) ...]))
+
+;; A College is one of
+;; - "Computer Science"
+;; - "Mathematics"
+;; - "Electrical Engineering"
+;; INTERP: represents the college the candidate is from
+#; (define (temp-college college)
+     (cond [(string=? college "Computer Science") ...]
+           [(string=? college "Mathematics") ...]
+           [(string=? college "Electrical Engineering") ...]))
+
+;; A Class is one of
+;; - 'CS101
+;; - 'CS201
+;; - 'CS301
+;; - 'CS401
+;; INTERP: represents the course numbers for which the candidate can apply
+#; (define (temp-class class)
+     (cond [(symbol=? class 'CS101) ...]
+           [(symbol=? class 'CS201) ...]
+           [(symbol=? class 'CS301) ...]
+           [(symbol=? class 'CS401) ...]))
+
+(define-struct candidate (degree college class gpa))
+;; A Candidate is a (make-candidate Degree College Class Real)
+;; INTERP: represents a candidate with their degree, college, class they are applying for a TAship, and their GPA
+(define cand1 (make-candidate 'BA "Computer Science" 'CS201 3))
+(define cand2 (make-candidate 'BA "Computer Science" 'CS101 2))
+(define cand3 (make-candidate 'BA "Computer Science" 'CS101 4))
+
+;; Check-Grades: Candidate Symbol -> Boolean
+;; Checks to see if a student is in a given class and has a gpa of 3.5 or higher
+(check-expect (check-grades cand1 'CS101) #false)
+(check-expect (check-grades cand2 'CS101) #false)
+(check-expect (check-grades cand3 'CS101) #true)
+(define (check-grades can cla)
+  (if (and (symbol=? (candidate-class can) cla) (>= (candidate-gpa can) 3.5)) #true #false))
+
+;; ###########################
+;; LAB - Nested Structs
+;; ###########################
+
+(define-struct traveller (first last))
+;; A Traveller is (make-traveller String String)
+;; INTERP: represents the first and last name of the traveller
+
+;; A City is a String
+;; INTERP: represents the name of a City
+
+
+;; A 1String is a String that contains 1 character, e.g., "A"
+
+
+(define-struct gate (prefix suffix))
+;; A Gate is (make-gate 1String PosInt)
+;; INTERP: represents the gate number as a one letter string and an integer.
+
+
+;; Hours is a PosInt
+;; WHERE : 0 <= hours <= 23
+;; INTERP: represents hours on a 24-hour clock
+
+;; Minutes is a PosInt
+;; WHERE: 0 <= minutes <= 59
+;; INTERP: represents minutes on a clock
+
+(define-struct time (hours minutes))
+;; A Time is (make-time Hours Minutes)
+;; INTERP: represents time as hours and minutes
+
+(define-struct boarding-pass (traveller source-city destination-city gate time))
+;; A BoardingPass is (make-boarding-pass Traveller City City Gate Time)
+;; WHERE: destination-city differs from source-city
+;; INTERP: represents a boarding pass with the traveller's name, the source and destination
+;;         city the gate and the time of departure
+
+(define pass1 (make-boarding-pass (make-traveller "John" "Doe") "Seatle" "Boston" (make-gate "A" 34) (make-time 22 30)))
+
+;; Print-Pass: Boarding-Pass -> String
+;; Prints a traveller's itenerary based on boarding pass data
+(check-expect (print-pass pass1) "John Doe, Seattle -> Boston, Gate A34 @ 22:30")
+(define (print-pass b-pass)
+  (string-append (traveller-first (boarding-pass-traveller b-pass)) " "
+                 (traveller-last (boarding-pass-traveller b-pass)) ", "

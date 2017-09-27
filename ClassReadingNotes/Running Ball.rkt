@@ -1,0 +1,95 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Running Ball|) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "convert.rkt" "teachpack" "htdp")) #f)))
+(define RADIUS 150)
+(define SPEED (quotient RADIUS 5))
+(define BALL (circle RADIUS "solid" "red"))
+(define WIDTH (* 8 RADIUS))
+(define MID RADIUS)
+(define BACKGROUND (empty-scene WIDTH (* 2 RADIUS)))
+(define TXT (text "press any key" 33 "black"))
+
+;; A SG is one of:
+;; - String
+;; - Running
+;; - Resting
+
+
+(define-struct running (x-pos dir))
+;; A Running is a (make-running Number Direction)
+
+;; A Direction is either 1 or -1
+;; INTERP: -1 means right to left, 1 is left to right
+
+(define-struct resting (x-pos dir))
+;; A Resting is a (make-resting Number Direction)
+
+
+#;(define (sg-temp asg)
+  (cond [(string? asg) ...]
+        [(running? asg) ... (running-x-pos asg) ... (running-dir asg)]
+        [(resting? asg) ... (resting-x-pos asg) ... (resting-dir asg)]))
+
+(define sg0 "press any key")
+(define sg1 (make-running 200 1))
+(define sg2 (make-resting 200 -1))
+
+
+;; SG -> SG
+;; launch the stop and go program
+(define (main str)
+  (big-bang str
+            [to-draw render-sg]
+            [on-tick next-ball]
+            [on-key start-pause]))
+
+
+;; render-sg: SG -> Image
+;; draw current world onto the background
+(check-expect (render-sg sg0) (place-image TXT (/ WIDTH 2) MID BACKGROUND))
+(check-expect (render-sg sg1) (place-image BALL 200 MID BACKGROUND))
+(check-expect (render-sg sg2) (place-image BALL 200 MID BACKGROUND))
+(define (render-sg asg)
+  (cond [(string? asg) (place-image TXT (/ WIDTH 2) MID BACKGROUND)]
+        [(running? asg) (place-image BALL (running-x-pos asg) MID BACKGROUND)]
+        [(resting? asg) (place-image BALL (resting-x-pos asg) MID BACKGROUND)]))
+
+
+;; start-pause: SG KeyEvent -> SG
+;; start the ball rolling or pause the ball
+(check-expect (start-pause sg0 " ") (make-running 0 -1))
+(check-expect (start-pause sg1 "k") (make-resting 200 1))
+(check-expect (start-pause sg2 "g") (make-running 200 -1))
+(define (start-pause asg akey)
+  (cond [(string? asg) (make-running 0 -1)]
+        [(running? asg) (make-resting (running-x-pos asg) (running-dir asg))]
+        [(resting? asg) (make-running (resting-x-pos asg)(resting-dir asg))]))
+
+;; next-ball: SG -> SG
+;; move/flip ball if running, or not if resting
+(check-expect (next-ball sg0) sg0)
+(check-expect (next-ball sg1) (make-running (+ 200 SPEED) 1))
+(check-expect (next-ball sg2) sg2)
+(check-expect (next-ball (make-running WIDTH 1)) (make-running (- WIDTH 1) -1))
+(check-expect (next-ball (make-running 0 -1)) (make-running 1 1))
+(define (next-ball asg)
+  (cond [(string? asg) asg]
+        [(running? asg) (if (< 0 (running-x-pos asg) WIDTH) (move-ball asg) (flip-ball asg))]
+        [(resting? asg) asg]))
+
+;; move-ball : Running -> Running
+;; move the ball by one position based on the direction
+(check-expect (move-ball sg1) (make-running (+ 200 SPEED) 1))
+(define (move-ball asg)
+  (make-running (+ (running-x-pos asg) (* SPEED (running-dir asg)))
+                (running-dir asg)))
+
+;; flip-ball: Running -> Running
+;; flip the direction of the ball
+(check-expect (next-ball (make-running WIDTH 1)) (make-running (- WIDTH 1) -1))
+(check-expect (next-ball (make-running 0 -1)) (make-running 1 1))
+(define (flip-ball asg)
+  (if (< 0 (running-dir asg)) (make-running (- WIDTH 1) (* -1 (running-dir asg)))
+      (make-running 1 (* -1 (running-dir asg)))))
+      
+                      
